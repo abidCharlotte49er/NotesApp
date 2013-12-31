@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width">
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css">
+<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+<script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.js"></script>
+<script>
+    $(document).ready(function () {
+
+
+    });
+
+    var data = {
+     notes: null, 
+     currentNotesID: null
+    }
+
+    function initializeApp() {
+        var url = 'http://test.ashaiks.com/ws/webservice.asmx/GetNotes';
+
+        var ajaxRequest = null;
+
+        if (typeof XMLHttpRequest != "undefined") {
+            ajaxRequest = new XMLHttpRequest();
+        } else if (window.ActiveXObject) {
+            ajaxRequest = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        ajaxRequest.open("GET", url, true);
+        ajaxRequest.onreadystatechange = callback;
+        //ajaxRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;"); // this was appliation/json . USE GET with xml. 
+        //ajaxRequest.setRequestHeader("Connection", "close");
+
+        ajaxRequest.send(null);
+
+        function callback(obj) {
+            if (ajaxRequest.readyState == 4) {
+                //console.log(ajaxRequest.responseText);
+                var resultObj = $.parseJSON(ajaxRequest.responseText);
+                //console.log(resultObj); 
+                data.notes = resultObj;
+                $.each(resultObj, function (i, obj) {
+                    //console.log(obj);
+                    $('#notesList').append('<li><a href="" data-id="' + obj.Id + '"><img src="http://abid.ashaiks.com/images/UNC/UNC1.jpg"/><h3>' + obj.Title + '</h3><p>' + obj.Description + '</p></a></li>');
+                    $('#notesList').listview('refresh');
+                });
+            }
+        }
+
+        $(document).on("click", "#notesList li a", function () {
+            data.currentNotesID = $(this).attr('data-id');
+            $.mobile.changePage("#headline", { transition: "slide" });
+        });
+
+        $(document).on("pagebeforeshow", "#headline", function () {
+            $('#movie-data').empty();
+            $.each(data.notes, function (i, note) {
+                if (note.Id == data.currentNotesID) {
+                    $("#movie-data").append("<li>" + note.Id + "</li>");
+                    $("#movie-data").append("<li>" + note.Title + "</li>");
+                    $("#movie-data").append("<li>" + note.Description + "</li>");
+                    $("#movie-data").listview("refresh");
+                }
+                else {
+                }
+            });
+        });
+    }
+
+    function addNotes()
+    {
+        params = $("#FrmNewNotes").serialize() + "&CreateDate=&imageUrl="
+        
+       $.ajax(
+            {
+                url: "http://test.ashaiks.com/ws/webservice.asmx/AddNotes",
+                data: params,
+                success: function (data, status, xhr) {
+                    notesApp.initialize(); 
+                    $.mobile.changePage($("#home"));
+                },
+                error: function (xhr, status, err) { }
+            }
+            );
+
+        
+      /*  alert("hit");
+        console.log(frm);
+        */
+    }
+    notesApp = {
+        initialize: initializeApp,
+        addNotes: addNotes,
+
+    }
+</script>
+</head>
+<body onload="notesApp.initialize()">
+
+<div data-role="page" id="home">
+    <div data-theme="b" data-role="header" data-position="fixed">
+        <h3>
+            Notes 
+        </h3>
+        <a href="#addNotes" id="addNotes" data-role="button" data-icon="plus" data-mini="true">Add Notes</a>
+    </div>        
+    <div data-role="content">
+        <div class="example-wrapper" data-iscroll>
+            <ul data-role="listview"  id="notesList" data-theme="b">
+                
+            </ul>
+        </div>
+    </div>
+    <div data-theme="b" data-role="footer" data-position="fixed">
+        <h1>Copyright 2013</h1>
+    </div>              
+</div>
+<div data-role="page" id="headline" >
+    <div data-theme="b" data-role="header" data-position="fixed">
+        <a href="#home" class="ui-btn-left" data-transition="slide" data-direction="reverse">Back</a>                        
+        <h3>
+            Product Listings
+        </h3>
+    </div>        
+    <div data-role="content">
+        <ul data-role="listview"  id="movie-data" data-theme="b">
+            
+        </ul>
+    </div>
+</div>    
+<div id="addNotes" data-role="page" data-theme="b">
+    <div data-role="header" data-theme="b" data-position="fixed">
+        <a href="#home" class="ui-btn-left" data-transition="slide" data-direction="reverse">Back</a>
+        <h3>Add new Notes</h3>
+    </div>
+    <div data-role="content">
+        <form id="FrmNewNotes">
+            <input type="text" name="Title" placeholder="Title"/>
+            <textarea name="description" placeholder ="Details" ></textarea>
+            <input type="submit" name="addNotesBtn" value="Add Notes" onclick="notesApp.addNotes()" />
+        </form>
+    </div>
+    <div data-role="footer" data-theme="b" data-position="fixed">
+        <h1>Copyright 2013</h1>
+    </div>
+</div>
+
+
+</body>
+</html>
+
+
+<!-- 
+
+$(document).ready(function() {
+    var url = 'http://fairmont.brightdoor.com/wcfws/ws.svc/GetAllProducts';
+var params = '{ "securityInfo" : {"ClientId":"1","CenterId":"1","Username":"dropbox","Password":"gonoles"}, "contactId":"1"}'; 
+		var ajaxRequest = null;
+
+		if (typeof XMLHttpRequest != "undefined") {
+			ajaxRequest = new XMLHttpRequest();
+		} else if (window.ActiveXObject) {
+			ajaxRequest = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+        
+		ajaxRequest.open("POST", url, true);
+		ajaxRequest.onreadystatechange = callback;
+		ajaxRequest.setRequestHeader("Content-Type", "application/json;");
+		//ajaxRequest.setRequestHeader("Connection", "close");
+		
+		ajaxRequest.send(params); 
+
+		function callback(obj) {
+			 if (ajaxRequest.readyState == 4)  {
+				//console.log(ajaxRequest.responseText);
+				var resultObj = $.parseJSON(ajaxRequest.responseText); 
+				$.each(resultObj.data.Products, function(i, product) {
+				//console.log(product); 
+				$('#movie-data').append('<li><img src="'+product.PhotoURL+'"/></li>'); 
+				$('#movie-list').append('<li>' + product.Name +'</li>');
+				$('#movie-list').append('<li>' + product.City +'</li>');
+				}); 
+			 }
+		}
+}); 
+
+
+END
+
+
+WORKING ASHAIKS CODE
+
+   $(document).ready(function () {
+        var url = 'http://test.ashaiks.com/ws/webservice.asmx/MyWebMethod?id=1&name=abc';
+        var params = '{"id":1,"name":"a"}';
+        var ajaxRequest = null;
+
+        if (typeof XMLHttpRequest != "undefined") {
+            ajaxRequest = new XMLHttpRequest();
+        } else if (window.ActiveXObject) {
+            ajaxRequest = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        ajaxRequest.open("GET", url, true);
+        ajaxRequest.onreadystatechange = callback;
+        //ajaxRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;"); // this was appliation/json . USE GET with xml. 
+        //ajaxRequest.setRequestHeader("Connection", "close");
+
+        ajaxRequest.send(params);
+
+        function callback(obj) {
+            if (ajaxRequest.readyState == 4) {
+                //console.log(ajaxRequest.responseText);
+                var resultObj = $.parseJSON(ajaxRequest.responseText);
+                //console.log(resultObj); 
+                data.notes = resultObj;
+                $.each(resultObj, function (i, obj) {
+                    //console.log(obj);
+                    $('#movie-list').append('<li><a href="" data-id="' + obj.Id + '"><img src="http://abid.ashaiks.com/images/UNC/UNC1.jpg"/><h3>' + obj.Title + '</h3><p>' + obj.Discription + '</p></a></li>');
+                    $('#movie-list').listview('refresh');
+                });
+            }
+        }
+
+        $(document).on("click", "#movie-list li a", function () {
+            data.currentNotesID = $(this).attr('data-id');
+            $.mobile.changePage("#headline", { transition: "slide" });
+        });
+
+        $(document).on("pagebeforeshow", "#headline", function () {
+            $('#movie-data').empty();
+            $.each(data.notes, function (i, note) {
+                if (note.Id == data.currentNotesID) {
+                    $("#movie-data").append("<li>" + note.Id + "</li>");
+                    $("#movie-data").append("<li>" + note.Title + "</li>");
+                    $("#movie-data").append("<li>" + note.Discription + "</li>");
+                    $("#movie-data").listview("refresh");
+                }
+                else {
+                }
+            });
+        });
+
+    });
+
+    var data = {
+     notes: null, 
+     currentNotesID: null
+    }
+
+$(document).on('pageinit', '#home', function(){      
+    var url = 'http://fairmont.brightdoor.com/wcfws/ws.svc/GetAllProducts/';
+    
+    $.ajax({
+        url: url,
+        dataType: "jsonp",
+        async: true,
+		data: { "securityInfo" : {"ClientId":"1","CenterId":"1","Username":"dropbox","Password":"gonoles"}, "contactId":"1"},
+        success: function (result) {
+            ajax.parseJSONP(result);
+        },
+        error: function (request,error) {
+            alert('Network error has occurred please try again!');
+        }
+    });         
+});
+
+$(document).on('pagebeforeshow', '#headline', function(){      
+    $('#movie-data').empty();
+    $.each(productInfo.result, function(i, row) {
+        if(row.ProductId == productInfo.id) {
+            $('#movie-data').append('<li><img src="'+row.PhotoURL+'"></li>');
+            $('#movie-data').append('<li>Title: '+row.Name+'</li>');
+            $('#movie-data').append('<li>Release date'+row.City+'</li>');
+            $('#movie-data').append('<li>Popularity : '+row.ProductStatus+'</li>');   
+            $('#movie-data').listview('refresh');            
+        }
+    });    
+});
+
+$(document).on('vclick', '#movie-list li a', function(){  
+    productInfo.id = $(this).attr('data-id');
+    $.mobile.changePage( "#headline", { transition: "slide", changeHash: false });
+});
+
+var productInfo = {
+    id : null,
+    result : null
+}
+
+var ajax = {  
+    parseJSONP:function(result){  
+        productInfo.result = result.results;
+        $.each(result.results, function(i, row) {
+            console.log(JSON.stringify(row));
+            $('#movie-list').append('<li><a href="" data-id="' + row.ProductId + '"><img src="'+row.PhotoURL+'"/><h3>' + row.Name + '</h3><p>' + row.City + '/10</p></a></li>');
+        });
+        $('#movie-list').listview('refresh');
+    }
+}
+-->
