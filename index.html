@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -88,16 +89,61 @@
       /*  alert("hit");
         console.log(frm);
         */
+
+    }
+    function validate() {
+       var credentials = $('#loginForm').serialize();
+        //console.log(credentials);
+       $.ajax(
+           {
+               url: "http://test.ashaiks.com/ws/Webservice.asmx/ValidateNotesAppUser",
+               data: credentials,
+               success: function (data, status, xhr) {
+                   var res = $.parseJSON(data);
+                   if (res.IsValid) {
+                       notesApp.initialize();
+                       //console.log(res);
+                       $.mobile.changePage($("#home"));
+                   } else {
+                       alert(res.Error);
+                   }
+                 // console.log(data);
+                 // console.log(status);
+                  //console.log(xhr);
+               },
+           }
+           );
+     
     }
     notesApp = {
         initialize: initializeApp,
         addNotes: addNotes,
+        validateUser: validate,
 
     }
 </script>
 </head>
-<body onload="notesApp.initialize()">
+<body><!--onload="notesApp.initialize()"-->
 
+<div data-role="page" id="login">
+    <div data-theme="b" data-role="header" data-position="fixed">
+        <h3>
+            Login
+        </h3>
+    </div>
+    <div data-role="content">
+        <form id="loginForm">
+        Userid<input type="text" name="userid"/>
+        Password<input type="password" name="password"/>
+        <input type="button" name="login" value="login" onclick="notesApp.validateUser(); return false;" />
+        </form>
+     </div>
+    <div data-role="footer" data-theme="b" data-position="fixed">
+        <h1>
+            logs
+        </h1>
+    </div>
+</div>
 <div data-role="page" id="home">
     <div data-theme="b" data-role="header" data-position="fixed">
         <h3>
